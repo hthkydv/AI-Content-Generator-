@@ -67,4 +67,3 @@ async function History() {
     );
 }
 export default History;
-export { History };
