@@ -24,7 +24,7 @@ async function History() {
     const HistoryList: HISTORY[] = await db
         .select()
         .from(AIOutput)
-        .where(eq(AIOutput.createdBy, user?.primaryEmailAddress?.emailAddress))
+        .where(eq(AIOutput.createdBy, user?.primaryEmailAddress?.emailAddress as string))
         .orderBy(desc(AIOutput.id));
 
     const GetTemplateName = (slug: string) => {
@@ -48,7 +48,7 @@ async function History() {
             {HistoryList.map((item: HISTORY, index: number) => (
                 <div key={index} className='grid grid-cols-7 my-5 py-5 px-3'>
                     <h2 className='col-span-2 flex gap-2 items-center'>
-                        <Image src={GetTemplateName(item?.templateSlug)?.icon} width={25} height={25} />
+                        <Image src={GetTemplateName(item?.templateSlug)?.icon} width={25} height={25} alt={GetTemplateName(item?.templateSlug)?.name || 'Template Icon'} />
                         {GetTemplateName(item.templateSlug)?.name}
                     </h2>
                     <h2 className='col-span-2 line-clamp-3'>{item?.aiResponse}</h2>

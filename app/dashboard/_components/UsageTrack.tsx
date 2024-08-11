@@ -39,7 +39,7 @@ function Usage() {
     }
     const IsuserSubscribe = async () => {
         const result = await db.select().from(UserSubscription)
-            .where(eq(UserSubscription.email, user?.primaryEmailAddress?.emailAddress));
+            .where(eq(UserSubscription.email, user?.primaryEmailAddress?.emailAddress as string));
 
         if (result) {
             setUserSubcription(true);
@@ -63,10 +63,7 @@ function Usage() {
             <div className='bg-primary text-white p-3 rounded-lg'>
                 <h2 className='font-medium'>Credits </h2>
                 <div className='h-2 bg-[#9981f9] w-full rounded-full mt-3  '>
-                    <div className='h-2 bg-white rounded-full'
-                        style={{
-                            width: `${(totalUsage / 100000) * 100}%`
-                        }} >
+                    <div className='h-2 bg-white rounded-full'>
                     </div>
 
                 </div>

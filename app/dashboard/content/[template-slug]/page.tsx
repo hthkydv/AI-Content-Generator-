@@ -7,7 +7,6 @@ import Template from '@/app/(data)/Template'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link';
-import { constrainedMemory } from 'process'
 import { chatSession } from '@/Utils/AiModal'
 import { db } from '@/Utils/db'
 import { AIOutput } from '@/Utils/schema'
@@ -17,8 +16,6 @@ import { TotalUsageContext } from '@/app/(context)/TotalUsagecontext'
 import { useRouter } from 'next/navigation'
 import { UserSubscriptionContext } from '@/app/(context)/UserSubscriptioncontext'
 import { UpdateCreditContex } from '@/app/(context)/UpdateCreditContex'
-import { date } from 'drizzle-orm/pg-core'
-
 
 interface PROPS {
   params: {
@@ -30,49 +27,51 @@ function Createnewcontent(props: PROPS) {
 
   const selectedTemplate: TEMPLATE | undefined = Template?.find((item) => item.slug == props.params['template-slug'])
 
-  const [loading, setloading] = useState(false);
-  const [aiOutput, setaiOutput] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [aiOutput, setAiOutput] = useState<string>('');
   const { user } = useUser();
-  const { totalUsage, setTotalUsage } = useContext(TotalUsageContext);
-  const { updateCreditUsage, setupdateCreditUsage } = useContext(UpdateCreditContex)
-
-  const { UserSubcription, setUserSubcription } = useContext(UserSubscriptionContext);
+  const { totalUsage } = useContext(TotalUsageContext);
+  const { setUpdateCreditUsage } = useContext(UpdateCreditContex)
+  const { UserSubcription } = useContext(UserSubscriptionContext);
   const router = useRouter();
-
 
   const GenerateAIContent = async (FormData: any) => {
     if (totalUsage >= 100000 && !UserSubcription) {
-      console.log('please up grade')
-      router.push('/dashboard/billing')
+      console.log('please upgrade');
+      router.push('/dashboard/billing');
       return;
     }
-    setloading(true)
+    setLoading(true);
     const selectedPrompt = selectedTemplate?.aiPrompt;
 
     const finalAiprompt = JSON.stringify(FormData) + " ," + selectedPrompt;
 
     const result = await chatSession.sendMessage(finalAiprompt);
 
-    console.log(result.response.text());
-    setaiOutput(result?.response.text());
-    await saveInDb(JSON.stringify(FormData), selectedTemplate?.slug, result?.response.text())
-    setloading(false);
-    setupdateCreditUsage(Date.now())
+    const aiResponseText = await result.response.text();
+    console.log(aiResponseText);
 
+    setAiOutput(aiResponseText);
+    await saveInDb(JSON.stringify(FormData), selectedTemplate?.slug, aiResponseText);
+    setLoading(false);
+    setUpdateCreditUsage(Date.now());
   }
 
   const saveInDb = async (formData: any, slug: any, aiResp: string) => {
+    if (!user?.primaryEmailAddress?.emailAddress) {
+      throw new Error('User email is not defined');
+    }
+
     const result = await db.insert(AIOutput).values({
       formData: formData,
       templateSlug: slug,
       aiResponse: aiResp,
-      createdBy: user?.primaryEmailAddress?.emailAddress,
+      createdBy: user.primaryEmailAddress.emailAddress,
       createdat: moment().format('DD/MM/YYYY'),
-
-
     });
+
     console.log(result);
-  }
+  };
 
   return (
     <div className='p-10'>
