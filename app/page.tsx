@@ -95,12 +95,7 @@ export default function Home() {
             <p className='text-lg'>{feature.description}</p>
           </div>
         ))}
-        <Button
-          onClick={() => router.push('/contact')}
-          className='mt-6 bg-blue-500 text-white py-3 px-6 text-lg rounded-full shadow-lg hover:bg-blue-600 transition-colors'
-        >
-          Contact Us
-        </Button>
+        
       </nav>
     </div>
   );
